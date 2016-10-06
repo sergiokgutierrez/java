@@ -1,3 +1,4 @@
+package sgutierrHw1;
 public class Location {
 	// index of Block in DynamicArray.arrayofBlocks
 	protected final int blockIndex; 

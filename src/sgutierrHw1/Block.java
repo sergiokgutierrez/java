@@ -1,19 +1,8 @@
+package sgutierrHw1;
 public class Block<T> {
 	protected final int number; // Block number, as in Block1
 	protected final T[] arrayOfElements; // Holds actual elements
-
-     // Note that it is not possible to use the code
-     // T a[] = new T[size]; 
-	// which leads to Java’s Generic Array Creation error on 
-     // compilation. Consult the textbook for solution to surmount this 
-     // minor problem
-
-	// Number of elements that can be stored in this block;
-     // this is equal to arrayOfElements.length
 	protected final int capacity;
-
-	// Number of spaces that have been allocated for storing elements;
-     // initially 0. size <= capacity
 	protected int size;
 
 	// Workhorse constructor. Initialize variables and create array.
@@ -47,8 +36,7 @@ public class Block<T> {
 		
 	}
 
-	// Set the last element to null and decrease the space allocated 
-     // for storing elements. Decreases size.
+	//time complexity O(1)
 	public void shrink(){
 		if(size == 0){
 			System.out.println("size = 0");
@@ -60,26 +48,28 @@ public class Block<T> {
 		
 	}
 
-	// Returns the element at position index in arrayOfElements.
+	// Returns the element at position index in arrayOfElements time complexity O(1)
 	public T getElement(int index){
 		return arrayOfElements[index];
 	}
 
-  	// Sets the value at position i in arrayOfElements to x.
+  	// Sets the value at position i in arrayOfElements to x. time complexity O(1)
 	public void setElement(int i, T x){
 		arrayOfElements[i] = x;
 	}
-	
+	////time complexity O(1)
 	public boolean isFull(){
 		if(size >= capacity){
 			return true;
 		}else
 			return false;
 	}
+	////time complexity O(1)
+	public boolean isEmpty(){
+		 return size == 0;
+	}
 
-     // Create a pretty representation of the Block.
-     // Example: 
-     // A	
+////time complexity O(n)
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; size > i;i++){
@@ -89,13 +79,10 @@ public class Block<T> {
 		return sb.toString();
 	}
 
-     // Create a pretty representation of the Block for debugging.
-     // Example: 
-     // A
-     // - capacity=1 size=1		
+//time complexity O(n)
 	protected String toStringForDebugging(){
 		StringBuilder sb = new StringBuilder();
-		for(int i=0; i<size;i++){
+		for(int i=0; i< size;i++){
 			sb.append(arrayOfElements[i]);
 			sb.append(" ");
 		}

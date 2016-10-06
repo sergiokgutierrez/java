@@ -1,3 +1,4 @@
+package sgutierrHw1;
 // CHANGELOG: 
 
 /* To run them on the command line, make sure that the junit-310.jar

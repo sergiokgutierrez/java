@@ -1,3 +1,8 @@
+package sgutierrHw1;
+//lets see if this is how it works
+
+import javax.swing.LayoutStyle;
+
 class DynamicArray<T> {
   protected Object[] arrayOfBlocks; 
   protected final int DEFAULTCAPACITY = 4;
@@ -20,7 +25,6 @@ class DynamicArray<T> {
 		  numberOfEmptyDataBlocks = 1;
 		  indexOfLastNonEmptyDataBlock = -1;
 		  numberOfSuperBlocks = 1;
-		  //create the array of Blocks at DEFAULTCAPACITY
 		  sizeOfArrayOfBlocks = 1;
 		  arrayOfBlocks = new Object[DEFAULTCAPACITY];
 		  //create first Block
@@ -52,7 +56,6 @@ class DynamicArray<T> {
 	  
 	  double ck2 = ((double)k / 2.0);//CEILING(k/2) since java divides only int I have to use doubles
 	  ck2 = Math.ceil(ck2);
-//	  ck2++;//add an extra shift
 	  int mask = ( 1 << (int)ck2);
 	  mask--;
 	  int elementIndex = mask & r;
@@ -73,7 +76,7 @@ class DynamicArray<T> {
   // index > size -1;
   // Target complexity: O(1)
   public T get(int i){
-	  if(i<0 || i>arrayOfBlocks.length-1){
+	  if(i < 0 || i > size-1){
 		  System.out.println("out of bounds\nincorrect range for i");
 		  return null;
 	  }
@@ -88,7 +91,7 @@ class DynamicArray<T> {
   // index > size -1;
   // Target complexity: O(1)
   public void set(int index, T x){
-	  if(index<0 || index>arrayOfBlocks.length-1){
+	  if(index<0 || index > size-1){
 		  System.out.println("out of bounds\nincorrect range for i");
 		  return;
 	  }
@@ -104,46 +107,39 @@ class DynamicArray<T> {
   // Called by add.
   // Target complexity: O(1)
   protected void grow(){
-	  //check if block is there
-	  Location newLocation = locate(size);
-	  boolean blockIsFull = newLocation.getBlockIndex() > indexOfLastDataBlock;//lastDataBlock is full and need to create one
-	  boolean superBlockIsFull = (lastSuperBlock.getCurrentNumberOfDataBlocks() >= lastSuperBlock.getMaxNumberOfDataBlocks() );//lastSuperBlock is full and need to crate a new one
+	  
+	  Block <T> block = (Block<T>)arrayOfBlocks[indexOfLastDataBlock]; 
+	  if(block.isFull()){
+		   if( indexOfLastDataBlock + 1 > arrayOfBlocks.length-1){//if the arrayOfBlocks is full it self is full and double it size (doesn't change values)
+			   expandArray();
+		   }
+		   if( arrayOfBlocks[indexOfLastDataBlock+1] == null){//If block was not created
 
-	  if(blockIsFull && newLocation.getBlockIndex() > arrayOfBlocks.length-1){//if the array it self is full and double it size (doesn't change values)
-		  expandArray();
-	  }
-	  if(blockIsFull && superBlockIsFull){//increase block AND superBlock
-		  /*
-		   * ADD NEW SUPERBLOCK
-		   */
-		  int k= lastSuperBlock.getNumber() + 1;
-		  int fk2 = Math.floorDiv(k, 2);//compute floor of(k/2)
-		  int tMaxNumberOfDataBlocks = power2(fk2);
-		  int ck2 = (int) Math.ceil(k / 2.0);
-		  int maxNumberOfElementsPerBlock = power2(ck2);
-		  
-		  lastSuperBlock = new SuperBlock(k, tMaxNumberOfDataBlocks, maxNumberOfElementsPerBlock, 0);
-		  /*
-		   * ADD NEW BLOCK
-		   */
-		  indexOfLastDataBlock++;
-		  sizeOfArrayOfBlocks++;
-		  arrayOfBlocks[indexOfLastDataBlock] = new Block<T>(indexOfLastDataBlock,lastSuperBlock.maxNumberOfElementsPerBlock); 
-		  lastSuperBlock.incrementCurrentNumberOfDataBlocks();//currentNumberOfDataBlocks = 1
-		  
+			  if(lastSuperBlock.isFull()){
+//					  ADD NEW SUPERBLOCK		  
+				  lastSuperBlock = getNewSuperBlock(lastSuperBlock.getNumber() + 1);//get next superblock
+				  numberOfSuperBlocks++;
+			  }
+			  arrayOfBlocks[indexOfLastDataBlock+1] = new Block<T>(indexOfLastDataBlock+1, lastSuperBlock.getMaxNumberOfElementsPerBlock());
+			  numberOfEmptyDataBlocks++;
+			  numberOfDataBlocks++;
+			  sizeOfArrayOfBlocks++;
+			  lastSuperBlock.incrementCurrentNumberOfDataBlocks();			  
+		  }
 
-		  
-	  }else if(blockIsFull){//Increase ONLY one block
-		  /*
-		   * ADD NEW BLOCK
-		   */
-		  indexOfLastDataBlock++;
-		  sizeOfArrayOfBlocks++;
-		  arrayOfBlocks[indexOfLastDataBlock] = new Block<T>(indexOfLastDataBlock,lastSuperBlock.maxNumberOfElementsPerBlock); 
-		  lastSuperBlock.incrementCurrentNumberOfDataBlocks();//currentNumberOfDataBlocks = 1
+			indexOfLastDataBlock++;
+	  }//run this even if full or empty
+	  
+
+		block = (Block<T>)arrayOfBlocks[indexOfLastDataBlock];  
+	  
+	  
+	  if(block.isEmpty()){
+		  numberOfEmptyDataBlocks--;
+		  numberOfNonEmptyDataBlocks++;
+		  indexOfLastNonEmptyDataBlock++;
 	  }
-	  Block<T> block = getBlock(size);
-	  block.grow(); 
+	  	block.grow();
 	  
   }
 
@@ -152,10 +148,11 @@ class DynamicArray<T> {
   // Target complexity: O(1)
   public void add(T x){
 	  grow();
-	  Block <T> tb =getBlock(size); 
+	  Block <T> tb = getBlock(size); 
 	  Location location = locate(size);
 	  tb.setElement(location.getElementIndex(), x);
 	  size++;
+	  
 	  
   }
 
@@ -168,8 +165,40 @@ class DynamicArray<T> {
   // called.
   // Target complexity: O(1)
   public void remove(){
-	  Block<T> block =(Block<T>)arrayOfBlocks[indexOfLastDataBlock];
-	  block.setElement(indexOfLastDataBlock, null);
+	  if(size == 0){
+		  System.out.println("not able to delete \n size == 0");
+		  return;
+	  }
+	  size--;
+	  Block <T> blockToDelete = getBlock(size);
+	  Location locationToDelete = locate(size);//block already exists no need to check for null
+	  blockToDelete.setElement(locationToDelete.getElementIndex(), null);
+	  blockToDelete.shrink();
+	  if(blockToDelete.isEmpty()){
+		  numberOfEmptyDataBlocks++;
+		  numberOfNonEmptyDataBlocks--;
+		  indexOfLastNonEmptyDataBlock--;
+	  }
+	  if(numberOfEmptyDataBlocks == 2){
+		  arrayOfBlocks[indexOfLastDataBlock] = null;
+		  numberOfDataBlocks--;
+		  sizeOfArrayOfBlocks--;
+		  numberOfEmptyDataBlocks--;
+		  indexOfLastDataBlock--;
+		  lastSuperBlock.decrementCurrentNumberOfDataBlocks();
+		  if(lastSuperBlock.isEmpty()){
+			  lastSuperBlock = getNewSuperBlock(lastSuperBlock.getNumber() -1);
+			  lastSuperBlock.fillUp();//fill up lastSuperblock since is being deleted to a previus full one
+			  numberOfSuperBlocks--;
+		  }
+	  }
+	  //if one quarter of the array is only full, then double it
+	  double fCapacity = arrayOfBlocks.length *(0.25);// 1/4 capicity of array length
+	  if( fCapacity > indexOfLastDataBlock)//shirnk array in half
+	  {
+		  shrinkArray();
+	  }
+
 	  
   }
 
@@ -182,7 +211,8 @@ class DynamicArray<T> {
 	  for (int i=0; i<arraySize; i++){//copy elements
 		  tempArrayOfBlocks [i] = arrayOfBlocks[i];
 	  }
-	  arrayOfBlocks = new Object[arraySize/2];//resize array by half
+	  arraySize = arraySize / 2;
+	  arrayOfBlocks = new Object[arraySize];//resize array by half
 	  for (int i=0; i<arraySize; i++){//copy elements back to arrqyOfBlocks
 		  arrayOfBlocks [i] = tempArrayOfBlocks[i];
 	  }
@@ -222,13 +252,23 @@ class DynamicArray<T> {
   //   N: number of elements in the DynamicArray
   public String toString(){
 	  StringBuilder sb = new StringBuilder();
-	  for(int i=0; indexOfLastDataBlock >= i ; i++){
-		  sb.append("[ ");
-		  Block<T> temp = (Block<T>) arrayOfBlocks[i];//create a temporary block
-		  sb.append(temp);
-		  sb.append("]");
+	  sb.append("[");
+	  for(int i=0; i <= indexOfLastDataBlock ; i++){
+		  //sb.append("[ ");
+		  @SuppressWarnings("unchecked")
+		Block<T> temp = (Block<T>) arrayOfBlocks[i];//create a temporary block
+		  if(temp == null){
+			  sb.append("_");  
+		  }else{			  
+			  sb.append(temp);
+		  }
+		  sb.append(", ");
 	  }
-	  
+	  if (indexOfLastDataBlock >= 0) {
+		  sb.deleteCharAt(sb.length() - 1);
+		  sb.deleteCharAt(sb.length() - 1);
+	  }
+	  sb.append("]");
 	  return sb.toString();
   }
 
@@ -251,47 +291,51 @@ class DynamicArray<T> {
   // - numberOfElementsPerBlock: 2
   // - currentNumberOfDataBlocks: 1
 
-  protected String toStringForDebugging(){
-	 StringBuffer sb = new StringBuffer("DynamicArray:"); 
-	 //loop that prints every single element on the DynamicArray
-	 for(int i = 0; i <= indexOfLastDataBlock; i++){
-		 Block<T> temp = (Block<T>) arrayOfBlocks[i];
-		 sb.append("i:"+i);
-		 sb.append(temp);
-	 }
+protected String toStringForDebugging(){
+	 
+	 StringBuffer sb = new StringBuffer(); 
+	 
 	 sb.append("\nnumberOfDataBlocks: "+numberOfDataBlocks);
 	 sb.append("\nnumberOfNonEmptyDataBlocks: "+numberOfNonEmptyDataBlocks);
 	 sb.append("\nindexOfLastDataBlock: "+indexOfLastDataBlock);
-	 sb.append("\nnumberOfEmptyDataBlocks: "+numberOfDataBlocks);
+	 sb.append("\nnumberOfEmptyDataBlocks: "+numberOfEmptyDataBlocks);
 	 sb.append("\nindexOfLastNonEmptyDataBlock: "+indexOfLastNonEmptyDataBlock);
 	 sb.append("\nnumberOfSuperBlocks: "+numberOfSuperBlocks);
 	 sb.append("\nlastSuperBlock = "+ lastSuperBlock.number);
-	 /*
-	  * create a loop that traverses trough the entite blocks and prits them out
-	  * for(int i= 0;i<numberOfDataBlocks;i++)
-	  * {
-	  * 	sb.append("Block"+arrayOfBlocks[i].number+);
-	  * 	sb.append(arrayOfBlocks[i].toStringForDebugging());
-	  * }
-	  */
-	 Block<T> block;
-	 for(int i=0; numberOfDataBlocks > i; i++){
-		 block = (Block<T>) arrayOfBlocks[i];
-		 sb.append("\nBlock"+block.getNumber()+": "+block.toStringForDebugging());
-	 }
+	 sb.append("\n");
+	  for(int i=0; i <= indexOfLastDataBlock ; i++){
+		  
+		  @SuppressWarnings("unchecked")
+		Block<T> temp = (Block<T>) arrayOfBlocks[i];
+		  sb.append("\nBlock"+temp.getNumber()+" : ");
+		  sb.append("\t"+temp.toStringForDebugging()+"\n");
+	  }
+	  
 	 sb.append("\nSB"+lastSuperBlock.number+":");
-	 sb.append(lastSuperBlock.toStringForDebugging());
+	 sb.append(lastSuperBlock.toStringForDebugging()+"\n");
 	 
 
 	 sb.append("\nsize: "+size);
 	 
 	 return sb.toString();
+
   }
   /*
    * my methods
    */
   
-  
+ public SuperBlock getNewSuperBlock(int superBlockNumber){
+	  /*
+	   * ADD NEW SUPERBLOCK
+	   */
+	  int k= superBlockNumber;
+	  int fk2 = Math.floorDiv(k, 2);//compute floor of(k/2)
+	  int tMaxNumberOfDataBlocks = power2(fk2);
+	  int ck2 = (int) Math.ceil(k / 2.0);
+	  int maxNumberOfElementsPerBlock = power2(ck2);
+	  return new SuperBlock(k, tMaxNumberOfDataBlocks, maxNumberOfElementsPerBlock, 0);
+	  
+ 	}
   
   public int returnB(int r, int k){
 		int lb = bitNum(r);//returns leading bit
@@ -301,7 +345,6 @@ class DynamicArray<T> {
 		int b = r & mask;
 		int lastShift = lb - ((int)Math.floorDiv(k,2)+1);
 		b = b >> lastShift;//substract leading bit by floor (k/2)
-		System.out.println("index: "+(r-1)+"\t\tb: "+b+"\t\tlb "+lb+"\t\tmask: "+mask+" \t\t\tlastshift "+lastShift+"\t\t b "+b);
 		return b;
   }
 
@@ -327,14 +370,14 @@ class DynamicArray<T> {
   }
   
 	// returns the number of bits in n ignoring leading 0 bits NORDSTROM
-  private static int bitNum(int n)
-  {
-     int  count = 0;
-     while (n != 0)
-     {
-        n = n >>> 1;
-        count++;
-     }
-     return count;
-  }
+	  private static int bitNum(int n)
+	  {
+	     int  count = 0;
+	     while (n != 0)
+	     {
+	        n = n >>> 1;
+	        count++;
+	     }
+	     return count;
+	  }
 }

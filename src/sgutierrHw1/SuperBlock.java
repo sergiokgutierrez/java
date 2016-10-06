@@ -1,3 +1,4 @@
+package sgutierrHw1;
 public class SuperBlock {
 protected int number; 	// as in S0, S1, etc.
 protected int maxNumberOfDataBlocks; 
@@ -45,7 +46,18 @@ protected int maxNumberOfDataBlocks;
  public int decrementCurrentNumberOfDataBlocks(){
 	 return --currentNumberOfDataBlocks;
  }
-
+ public boolean isEmpty(){
+	 return currentNumberOfDataBlocks == 0;
+ }
+ public boolean isFull(){
+	 return currentNumberOfDataBlocks >= maxNumberOfDataBlocks;
+ }
+/*
+ * fills up the superBlock because it was a full, but yet we need to create a new on
+ */
+ public void fillUp(){
+	 currentNumberOfDataBlocks = maxNumberOfDataBlocks;
+ }
  // Create a pretty representation of the SuperBlock for debugging.
  // Example:
 //    - maxNumberOfDataBlocks:2	
@@ -53,9 +65,9 @@ protected int maxNumberOfDataBlocks;
 //    - currentNumberOfDataBlocks:1
  protected String toStringForDebugging(){
  	StringBuilder sb = new StringBuilder("");
- 	sb.append("\n- maxNumberOfDataBlocks: "+maxNumberOfDataBlocks);
- 	sb.append("\n- maxNumberOfElementsPerBlock: "+maxNumberOfElementsPerBlock);//  -
- 	sb.append("\n- currentNumberOfDataBlocks:"+currentNumberOfDataBlocks);//  
+ 	sb.append("- maxNumberOfDataBlocks: "+maxNumberOfDataBlocks+"\n");
+ 	sb.append("- maxNumberOfElementsPerBlock: "+maxNumberOfElementsPerBlock+"\n");//  -
+ 	sb.append("- currentNumberOfDataBlocks: "+currentNumberOfDataBlocks+"\n");//  
  	return sb.toString();
 }
 }

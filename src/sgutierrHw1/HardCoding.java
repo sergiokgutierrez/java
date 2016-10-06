@@ -1,10 +1,73 @@
+package sgutierrHw1;
+import static org.junit.Assert.assertEquals;
+
 import java.lang.*;
+import java.util.Scanner;
+
+import org.junit.Test;
 public class HardCoding {
 	public static void main(String[] args) {
 		
+//		runner();
 		bigTest();
+//		addStress();
+//		DynamicArray_grow1();
 	
 	}
+	
+	
+	
+	
+	public static void addStress(){
+		 DynamicArray<Integer> da = new DynamicArray<Integer>();
+		 for(int i=0; i<100; i++){
+		   da.add(i);
+		 }
+		 String expect, actual, msg;
+		 assertEquals("Size mismatch",100,da.size());
+		 assertEquals("#Blocks mismatch",19,da.numberOfDataBlocks);
+		 expect =
+		   "- maxNumberOfDataBlocks: 8\n"+
+		   "- maxNumberOfElementsPerBlock: 8\n"+
+		   "- currentNumberOfDataBlocks: 5\n"+
+		   "";
+		 actual = da.lastSuperBlock.toStringForDebugging();
+		 msg = String.format("lastSuperBlock wrong:\nEXPECT:\n%sACTUAL:\n%s\n",expect,actual);
+		 assertEquals(msg,expect,actual);
+	}
+	
+	  public static void DynamicArray_grow1(){
+	   // test grow() on empty DynamicArray
+	     DynamicArray<String> d1 = new DynamicArray<String>();
+	     d1.grow(); // grow one space in Block0
+	 
+	    Block b = d1.getBlock(0);
+
+	    if(b.getNumber()!=0){
+	       System.out.println("DynamicArray grow:\n"+
+	          "Expect: +b.getNumber==0\n" +
+	          "Actual: b.getNumber==" + b.getNumber());
+	     }
+	 
+	    if(b.getCapacity()!=1){
+	    	System.out.println("DynamicArray grow:\n"+
+	          "Expect: +b.getCapacity==1\n" +
+	          "Actual: b.getCapacity==" + b.getCapacity());
+	    }
+	    if(b.size()!=1){
+	    	System.out.println("DynamicArray grow:\n"+
+	          "Expect: +b.size==1n" +
+	          "Actual: b.size==" + b.size());
+	    }
+	  }
+	
+	
+	
+	
+	
+	
+	
+	
 	public static void minorTest(){
 		DynamicArray< String> da = new DynamicArray<>();
 		
@@ -14,20 +77,51 @@ public class HardCoding {
 		}
 	}
 	
+	public static void runner(){
+		Scanner keyboard = new Scanner (System.in);
+		String x = "0";
+		String input;
+		DynamicArray< String> da = new DynamicArray<>();
+		while(true){
+			System.out.println("1\t\tadd");
+			System.out.println("2\t\tremove");
+			System.out.println("3\t\tprint");
+			x = keyboard.next();
+			switch(x){
+			case "1":
+				input = keyboard.next();
+				da.add(input);
+				break;
+			case "2":
+				da.remove();
+				break;
+			case "3":
+				System.out.println(da.toStringForDebugging());
+				System.out.println(da);
+				break;
+			default:
+				System.out.println("wrong input try again");
+			}
+			
+		}
+	}
+	
 	public static void bigTest(){
 	DynamicArray<String> da = new DynamicArray<String>();
-		
-		
-		System.out.println(da.returnB(6, 3));
-		
-		
-		
+	
 		System.out.println("\n\n\n\n\n"+da.toStringForDebugging());
-		da.add("T");
+		da.add("A");
 		System.out.println("\n"+da.toStringForDebugging());
-		da.add("P");
+		da.add("B");
 		System.out.println("\n\n\n"+da.toStringForDebugging());
-		System.out.println(da);
+		da.add("C");
+		System.out.println("\n"+da.toStringForDebugging());
+		da.add("D");
+		System.out.println("\n\n\n"+da.toStringForDebugging());
+		da.add("E");
+		System.out.println("\n"+da.toStringForDebugging());
+		da.add("F");
+		System.out.println("\n\n\n"+da.toStringForDebugging());
 		
 		
 		da.add("Q");
